@@ -51,12 +51,19 @@ class MainWindow(QMainWindow):
         self.drop_zone.filesDropped.connect(self.sidebar.add_dropped_files)
         self.sidebar.convert_button.clicked.connect(self.start_conversion)
         self.sidebar.file_list.currentItemChanged.connect(self.update_preview)
+        self.sidebar.previewCleared.connect(self.clear_preview)
 
         self.load_styles()
 
     def update_preview(self, current, previous):
         if current:
             self.preview.set_preview_image(current.text())
+        # If the list becomes empty, current is None
+        elif self.sidebar.file_list.count() == 0:
+            self.clear_preview()
+
+    def clear_preview(self):
+        self.preview.set_preview_image(None)
 
     def start_conversion(self):
         files = [self.sidebar.file_list.item(i).text() for i in range(self.sidebar.file_list.count())]

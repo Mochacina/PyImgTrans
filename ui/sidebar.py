@@ -1,10 +1,13 @@
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QListWidget, QPushButton, QHBoxLayout,
                              QFileDialog, QGroupBox, QFormLayout, QComboBox, QSlider,
                              QSpinBox, QCheckBox)
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, pyqtSignal
 from core.settings import AppSettings
 
 class Sidebar(QWidget):
+    # Signal to notify when the preview should be cleared
+    previewCleared = pyqtSignal()
+
     def __init__(self):
         super().__init__()
         self.settings = AppSettings()
@@ -90,11 +93,22 @@ class Sidebar(QWidget):
             self.file_list.addItems(files)
 
     def remove_selected_file(self):
-        for item in self.file_list.selectedItems():
-            self.file_list.takeItem(self.file_list.row(item))
+        list_widget = self.file_list
+        selected_items = list_widget.selectedItems()
+        if not selected_items:
+            return
+
+        current_item = list_widget.currentItem()
+        
+        for item in selected_items:
+            # Check if the removed item is the one being previewed
+            if item == current_item:
+                self.previewCleared.emit()
+            list_widget.takeItem(list_widget.row(item))
 
     def clear_all_files(self):
         self.file_list.clear()
+        self.previewCleared.emit()
 
     def add_dropped_files(self, files):
         # 유효한 이미지 파일만 필터링
