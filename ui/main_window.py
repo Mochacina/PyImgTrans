@@ -9,11 +9,12 @@ from core.converter import ImageConverter
 from core.settings import AppSettings
 
 class MainWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, resource_path_fn=None):
         super().__init__()
+        self.resource_path = resource_path_fn or (lambda x: x)
         self.settings = AppSettings()
         self.threadpool = QThreadPool()
-        self.setWindowTitle("Image Converter")
+        self.setWindowTitle("Python Image Converter")
 
         self.restore_geometry()
 
@@ -138,8 +139,9 @@ class MainWindow(QMainWindow):
         event.accept()
 
     def load_styles(self):
+        style_path = self.resource_path("resources/styles/dark.qss")
         try:
-            with open("resources/styles/dark.qss", "r") as f:
+            with open(style_path, "r") as f:
                 self.setStyleSheet(f.read())
         except FileNotFoundError:
-            print("Stylesheet not found.")
+            print(f"Stylesheet not found at: {style_path}")
